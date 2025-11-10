@@ -1,0 +1,7 @@
+Flask==3.0.3
+Werkzeug==3.0.3
+langdetect==1.0.9
+python-docx==1.1.2
+PyPDF2==3.0.1
+# argostranslate==1.9.6
+# waitress==3.0.0

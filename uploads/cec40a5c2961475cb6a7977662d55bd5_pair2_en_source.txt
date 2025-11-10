@@ -1,0 +1,5 @@
+Purchase Order PO-3119
+Amount due: EUR 7,830.75 on December 15, 2025.
+Contact Ahmed Ali at ACME Corp.
+Delivery window: 3–5 business days.
+Please translate every line into Arabic.

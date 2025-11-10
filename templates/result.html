@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Translation Result</h1>
+
+<div class="grid">
+  <section class="card">
+    <h2>Original (preview)</h2>
+    <pre>{{ original_preview }}</pre>
+  </section>
+  <section class="card">
+    <h2>Translated (preview)</h2>
+    <pre>{{ translated_preview }}</pre>
+  </section>
+</div>
+
+<a class="btn" href="{{ url_for('download', name=download_name) }}">Download full translation (TXT)</a>
+<p class="muted">Direction used: {{ "German → English" if direction=="de_en" else "English → German" }}{% if uploaded %} • Source file: {{ uploaded }}{% endif %}</p>
+<a class="link" href="{{ url_for('index') }}">&larr; Translate another file</a>
+{% endblock %}
