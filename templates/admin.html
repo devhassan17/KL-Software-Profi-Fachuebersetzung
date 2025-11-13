@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card-title">Admin dashboard</div>
+<p class="section-description">
+  Jobs list, status, word count, price, and actions.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th align="left">Created</th>
+      <th align="left">Job</th>
+      <th align="left">Client</th>
+      <th align="left">Lang</th>
+      <th align="right">Words</th>
+      <th align="right">Price</th>
+      <th align="left">Status</th>
+      <th align="left">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for job in jobs %}
+    <tr>
+      <td>{{ job.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td>
+        <a href="{{ url_for('job_detail', job_uuid=job.job_uuid) }}" target="_blank">
+          {{ job.job_uuid[:8] }}…
+        </a><br />
+        <span class="text-muted">{{ job.original_filename or 'Pasted text' }}</span>
+      </td>
+      <td>{{ job.client_email or '–' }}</td>
+      <td>{{ job.source_lang or "AUTO" }} → {{ job.target_lang }}</td>
+      <td align="right">{{ job.word_count or "–" }}</td>
+      <td align="right">{{ job.price_estimate if job.price_estimate is not none else "–" }}</td>
+      <td>
+        <span class="badge status-{{ job.status }}">{{ job.status }}</span>
+      </td>
+      <td>
+        <form method="post" action="{{ url_for('admin_delete', job_uuid=job.job_uuid) }}?password={{ config['ADMIN_PASSWORD'] }}"
+              onsubmit="return confirm('Delete job?')">
+          <button class="btn btn-danger" type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

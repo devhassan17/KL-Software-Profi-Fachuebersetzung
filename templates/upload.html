@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card-title">Upload &amp; Translate</div>
+<p class="section-description">
+  Upload TXT/DOCX/PDF files <em>or</em> paste text. Configure domain, tone,
+  deadline and glossary.
+</p>
+
+<form method="post" enctype="multipart/form-data">
+  <div class="row">
+    <div class="col">
+      <label>Client email (for notifications)</label>
+      <input type="email" name="client_email" placeholder="client@example.com" />
+    </div>
+    <div class="col">
+      <label>Deadline</label>
+      <input type="date" name="deadline" />
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:1rem;">
+    <div class="col">
+      <label>Source language</label>
+      <select name="source_lang">
+        <option value="">Auto-detect</option>
+        <option value="DE">German (DE)</option>
+        <option value="EN">English (EN)</option>
+      </select>
+    </div>
+    <div class="col">
+      <label>Target language</label>
+      <select name="target_lang" required>
+        <option value="EN">English (EN)</option>
+        <option value="DE">German (DE)</option>
+      </select>
+    </div>
+    <div class="col">
+      <label>Domain</label>
+      <select name="domain">
+        <option value="general">General</option>
+        <option value="legal">Legal</option>
+        <option value="medical">Medical</option>
+        <option value="technical">Technical</option>
+      </select>
+    </div>
+    <div class="col">
+      <label>Tone</label>
+      <select name="tone">
+        <option value="neutral">Neutral</option>
+        <option value="formal">Formal</option>
+        <option value="friendly">Friendly</option>
+      </select>
+    </div>
+  </div>
+
+  <div style="margin-top:1rem;">
+    <label>Chatbot intent (prefilled)</label>
+    <input type="text" name="intent" value="{{ intent or '' }}" placeholder="e.g. Translate my product manual to EN" />
+  </div>
+
+  <div style="margin-top:1rem;">
+    <label>Paste text (Text box mode)</label>
+    <textarea name="pasted_text" placeholder="Paste text to translate..."></textarea>
+  </div>
+
+  <div style="margin-top:1rem;">
+    <label>Upload files (TXT, DOCX, PDF)</label>
+    <input type="file" name="files" multiple />
+  </div>
+
+  <div style="margin-top:1rem;">
+    <label>Glossary / Terminology (one per line, format: source => target)</label>
+    <textarea name="glossary" placeholder="Rechnung => invoice&#10;Vertrag => contract"></textarea>
+  </div>
+
+  <div style="margin-top:1.25rem;">
+    <button type="submit" class="btn">Start translation</button>
+  </div>
+</form>
+{% endblock %}

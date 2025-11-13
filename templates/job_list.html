@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card-title">Translation jobs created</div>
+<p class="section-description">
+  Multiple files were uploaded. Click a job to see its translation.
+</p>
+
+<ul style="list-style:none; padding:0; margin:0;">
+  {% for job in jobs %}
+    <li style="margin-bottom:0.75rem; padding-bottom:0.75rem; border-bottom:1px solid #f3f4f6;">
+      <a href="{{ url_for('job_detail', job_uuid=job.job_uuid) }}">
+        <strong>Job {{ job.job_uuid[:8] }}…</strong>
+      </a>
+      <span class="badge status-{{ job.status }}">{{ job.status }}</span>
+      <div class="text-muted">
+        {{ job.original_filename or 'Pasted text' }} ·
+        {{ job.source_lang or "AUTO" }} → {{ job.target_lang }} ·
+        Words: {{ job.word_count or "–" }}
+      </div>
+    </li>
+  {% endfor %}
+</ul>
+{% endblock %}

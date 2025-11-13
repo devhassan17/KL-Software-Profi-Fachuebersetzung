@@ -1,25 +1,286 @@
-:root{--bg:#0b5fff;--ink:#0b1220;--muted:#667085;--card:#ffffff;--border:#e7e7ea}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:linear-gradient(180deg,#f7f8fb 0%,#edf1ff 100%)}
-.topbar{background:var(--bg);color:#fff;padding:14px 18px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
-.brand{font-weight:600}
-.container{max-width:860px;margin:32px auto;padding:0 18px}
-h1{margin:0 0 16px 0;font-size:28px}
-h2{margin:0 0 8px 0;font-size:18px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin:14px 0;box-shadow:0 10px 30px rgba(11,95,255,.08)}
-.row{display:flex;gap:16px;margin:6px 0 14px 0;flex-wrap:wrap}
-.label{display:block;margin:8px 0 6px 0;font-size:14px;color:var(--muted)}
-input[type=file]{display:block;margin-bottom:10px}
-textarea{width:100%;padding:12px;border:1px solid var(--border);border-radius:12px;resize:vertical;background:#fbfcff}
-.btn{display:inline-block;background:var(--bg);color:#fff;padding:10px 14px;border:none;border-radius:12px;cursor:pointer;text-decoration:none;margin-top:12px}
-.btn:hover{opacity:.95;transform:translateY(-1px)}
-.divider{color:var(--muted);text-align:center;margin:12px 0}
-.radio{display:flex;gap:8px;align-items:center}
-.grid{display:grid;grid-template-columns:1fr;gap:14px}
-@media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
-pre{white-space:pre-wrap;background:#fbfcff;padding:12px;border:1px dashed var(--border);border-radius:12px}
-.footer{padding:20px;text-align:center;color:var(--muted)}
-.flash{margin-top:10px;background:#fff5f5;border:1px solid #ffdede;color:#8a1f1f;padding:10px;border-radius:12px}
-.link{display:inline-block;margin-top:12px}
-.muted{color:var(--muted);margin-top:12px}
+/* ---- Base layout ---- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f3f4f6;
+  margin: 0;
+  padding: 0;
+  color: #111827;
+}
+
+a {
+  color: #111827;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ---- Header ---- */
+
+.app-header {
+  background: #111827;
+  color: #f9fafb;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.app-nav a {
+  color: #9ca3af;
+  margin-left: 1rem;
+  font-size: 0.9rem;
+}
+
+.app-nav a:hover {
+  color: #f9fafb;
+}
+
+/* ---- Main container ---- */
+
+.container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+/* ---- Typography & cards ---- */
+
+.card-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+p {
+  margin-top: 0;
+}
+
+.section-description {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+/* ---- Form elements ---- */
+
+label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #374151;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  font-size: 0.9rem;
+  background: #f9fafb;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="date"]:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #111827;
+  box-shadow: 0 0 0 1px rgba(17, 24, 39, 0.1);
+  background: #ffffff;
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* ---- Layout helpers ---- */
+
+.row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.col {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---- Buttons ---- */
+
+.btn {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: #111827;
+  color: #f9fafb;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+}
+
+.btn:hover {
+  background: #020617;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background: #4b5563;
+}
+
+.btn-secondary:hover {
+  background: #374151;
+}
+
+.btn-danger {
+  background: #b91c1c;
+}
+
+.btn-danger:hover {
+  background: #7f1d1d;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  box-shadow: none;
+}
+
+/* ---- Badges / status ---- */
+
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  background: #e5e7eb;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge.status-Done {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge.status-Error {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.badge.status-Translating {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.badge.status-Uploaded {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* ---- Preformatted text ---- */
+
+pre {
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  overflow-x: auto;
+  font-size: 0.8rem;
+  border: 1px solid #e5e7eb;
+}
+
+/* ---- Flash messages ---- */
+
+.flash-error {
+  color: #b91c1c;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.flash-success {
+  color: #15803d;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* ---- Tables (admin) ---- */
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  padding: 0.5rem 0.25rem;
+  font-size: 0.85rem;
+}
+
+thead tr {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+}
+
+/* ---- Small helpers ---- */
+
+.text-muted {
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+.file-list {
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+/* ---- Responsive ---- */
+
+@media (max-width: 640px) {
+  .container {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .app-nav a {
+    margin-left: 0;
+    margin-right: 0.75rem;
+  }
+}
