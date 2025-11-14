@@ -40,7 +40,6 @@ document.addEventListener("DOMContentLoaded", function () {
   // --- Disable submit button on submit + simple validation hint ---
   if (form && submitBtn) {
     form.addEventListener("submit", (e) => {
-      // Basic check: if no text and no files, block submit
       const hasText =
         pastedText && pastedText.value.trim().length > 0;
       const hasFiles =
