@@ -3,9 +3,6 @@ import io
 import uuid
 from datetime import datetime
 
-from dotenv import load_dotenv
-load_dotenv()  # Load .env into environment
-
 import requests
 from flask import (
     Flask, render_template, request, redirect,
@@ -13,45 +10,52 @@ from flask import (
 )
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
-from docx import Document
-import pdfplumber
+
+# Optional: install these for DOCX/PDF support
+# pip install python-docx pdfplumber
+try:
+    from docx import Document
+    import pdfplumber
+except ImportError:
+    Document = None
+    pdfplumber = None
 
 # -------------------------------------------------------------------
-# Config / setup
+# CREDENTIALS / SECRETS (edit these later)
+# -------------------------------------------------------------------
+ADMIN_PASSWORD = "admin123"                 # change this later
+DEEPL_API_KEY = "c0f59d26-3794-492d-91db-38d4b47d3749:fx"   # put your real key here
+DEEPL_API_PLAN = "free"                     # or "pro"
+
+# -------------------------------------------------------------------
+# Config
 # -------------------------------------------------------------------
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
+# Ensure instance/ exists before creating DB URI
 INSTANCE_DIR = os.path.join(BASE_DIR, "instance")
 os.makedirs(INSTANCE_DIR, exist_ok=True)
 
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-ALLOWED_EXTENSIONS = {"txt", "pdf", "docx"}
-
-
-def allowed_file(filename: str) -> bool:
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "change-me"
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(
-    INSTANCE_DIR, "app.sqlite"
-)
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(INSTANCE_DIR, "app.sqlite")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Simple admin password (for demo only — replace with real auth later)
-app.config["ADMIN_PASSWORD"] = os.environ.get("ADMIN_PASSWORD", "admin123")
+# Simple admin password (now fully inside app.py)
+app.config["ADMIN_PASSWORD"] = ADMIN_PASSWORD
 
+# File config
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
 
 
+# Make config available in templates as `config`
 @app.context_processor
 def inject_config():
-    """Make config accessible as `config` inside templates."""
     return dict(config=app.config)
 
 
@@ -62,7 +66,7 @@ class Job(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     job_uuid = db.Column(db.String(36), unique=True, index=True)
     client_email = db.Column(db.String(255))
-    source_lang = db.Column(db.String(5))   # "DE" / "EN" / etc
+    source_lang = db.Column(db.String(5))   # "DE" / "EN"
     target_lang = db.Column(db.String(5))
     domain = db.Column(db.String(50))       # legal/medical/technical/other
     tone = db.Column(db.String(50))         # formal/friendly, etc
@@ -77,11 +81,7 @@ class Job(db.Model):
     translated_text = db.Column(db.Text)
     error_message = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(
-        db.DateTime,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
-    )
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
 class AuditLog(db.Model):
@@ -98,6 +98,7 @@ class AuditLog(db.Model):
 # Utilities
 # -------------------------------------------------------------------
 def init_db():
+    """Create tables if they don't exist."""
     db.create_all()
 
 
@@ -127,8 +128,8 @@ def parse_glossary(glossary_raw: str):
     Very simple glossary format:
     one pair per line: source_term => target_term
     e.g.:
-    invoice => Rechnung
-    contract => Vertrag
+    Rechnung => invoice
+    Vertrag => contract
     """
     mapping = {}
     glossary_raw = glossary_raw or ""
@@ -142,7 +143,7 @@ def parse_glossary(glossary_raw: str):
 def apply_glossary(text: str, glossary_raw: str) -> str:
     mapping = parse_glossary(glossary_raw)
     for src, tgt in mapping.items():
-        # naive replace; can be improved with regex word boundaries
+        # naive replace; you can improve (word boundaries, case, etc.)
         text = text.replace(src, tgt)
     return text
 
@@ -150,13 +151,13 @@ def apply_glossary(text: str, glossary_raw: str) -> str:
 def deepl_translate(text: str, source_lang: str, target_lang: str) -> str:
     """
     Call DeepL API.
-    Set DEEPL_API_KEY and DEEPL_API_PLAN=free|pro in your .env.
+    Credentials are now taken from constants at the top of app.py.
     """
-    api_key = os.environ.get("DEEPL_API_KEY")
-    plan = os.environ.get("DEEPL_API_PLAN", "free")
+    api_key = DEEPL_API_KEY
+    plan = DEEPL_API_PLAN
 
-    if not api_key:
-        # In development, just return original with note
+    if not api_key or api_key == "YOUR_DEEPL_API_KEY_HERE":
+        # In development, just fake it so app is still usable
         return f"[NO DEEPL_API_KEY SET]\n\nOriginal:\n{text}"
 
     if plan == "pro":
@@ -164,7 +165,10 @@ def deepl_translate(text: str, source_lang: str, target_lang: str) -> str:
     else:
         base_url = "https://api-free.deepl.com/v2/translate"
 
-    data = {"text": text, "target_lang": target_lang}
+    data = {
+        "text": text,
+        "target_lang": target_lang,
+    }
     if source_lang:
         data["source_lang"] = source_lang
 
@@ -187,26 +191,23 @@ def read_file_content(file_storage):
     filename = secure_filename(file_storage.filename)
     ext = filename.rsplit(".", 1)[-1].lower()
 
-    if ext not in ALLOWED_EXTENSIONS:
-        raise ValueError(f"Unsupported file type: .{ext}")
-
     if ext == "txt":
         return file_storage.read().decode("utf-8", errors="ignore")
 
-    if ext == "docx":
+    if ext == "docx" and Document is not None:
         buf = io.BytesIO(file_storage.read())
         doc = Document(buf)
         return "\n".join(p.text for p in doc.paragraphs)
 
-    if ext == "pdf":
+    if ext == "pdf" and pdfplumber is not None:
         buf = io.BytesIO(file_storage.read())
-        text_chunks = []
+        text = []
         with pdfplumber.open(buf) as pdf:
             for page in pdf.pages:
-                text_chunks.append(page.extract_text() or "")
-        return "\n".join(text_chunks)
+                text.append(page.extract_text() or "")
+        return "\n".join(text)
 
-    # Fallback — shouldn't be reached
+    # Fallback if libs missing or unknown extension
     return file_storage.read().decode("utf-8", errors="ignore")
 
 
@@ -257,10 +258,6 @@ def upload_translate():
         for file in uploaded_files:
             if not file or file.filename == "":
                 continue
-            if not allowed_file(file.filename):
-                flash(f"Unsupported file type: {file.filename}", "error")
-                continue
-
             job = create_and_run_job(
                 client_email,
                 source_lang,
@@ -283,6 +280,7 @@ def upload_translate():
         if len(jobs) == 1:
             return redirect(url_for("job_detail", job_uuid=jobs[0].job_uuid))
         else:
+            # For multiple jobs, show a simple list
             return render_template("job_list.html", jobs=jobs)
 
     # GET
@@ -320,6 +318,7 @@ def create_and_run_job(
     db.session.commit()
     log_event(job, "upload", "Job created")
 
+    # Read file content if needed
     if original_text is None and file_storage is not None:
         original_text = read_file_content(file_storage)
 
@@ -337,9 +336,12 @@ def create_and_run_job(
         job.word_count = words
         job.price_estimate = compute_price(words, domain)
 
-        job.status = "Done"  # later you can add a "Review" step
+        job.status = "Done"  # you could add a "Review" step later
         db.session.commit()
         log_event(job, "status_change", "Status -> Done")
+
+        # TODO: send email notification here if email is configured
+        # send_completion_email(job)
 
     except Exception as e:
         job.status = "Error"
@@ -359,8 +361,8 @@ def job_detail(job_uuid):
 @app.route("/download/<job_uuid>")
 def download_job(job_uuid):
     job = Job.query.filter_by(job_uuid=job_uuid).first_or_404()
-    filename_root = job.original_filename or "translation"
-    filename = f"{filename_root}.txt"
+    # For now: export TXT
+    filename = (job.original_filename or "translation") + ".txt"
     buf = io.BytesIO()
     buf.write((job.translated_text or "").encode("utf-8"))
     buf.seek(0)
@@ -398,9 +400,7 @@ def admin_delete(job_uuid):
     log_event(job, "delete", "Job deleted by admin")
     db.session.delete(job)
     db.session.commit()
-    return redirect(
-        url_for("admin_dashboard") + f"?password={app.config['ADMIN_PASSWORD']}"
-    )
+    return redirect(url_for("admin_dashboard") + f"?password={app.config['ADMIN_PASSWORD']}")
 
 
 # -------------------------------------------------------------------
@@ -441,6 +441,7 @@ def api_download(job_uuid):
 
 
 if __name__ == "__main__":
+    # Flask 3: manually init DB before running
     with app.app_context():
         init_db()
     app.run(debug=True)
