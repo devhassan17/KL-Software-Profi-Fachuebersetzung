@@ -6,7 +6,7 @@ from datetime import datetime
 import requests
 from flask import (
     Flask, render_template, request, redirect,
-    url_for, send_file, flash, jsonify
+    url_for, send_file, flash, jsonify, abort
 )
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
@@ -24,8 +24,15 @@ except ImportError:
 # CREDENTIALS / SECRETS (edit these later)
 # -------------------------------------------------------------------
 ADMIN_PASSWORD = "admin123"                 # change this later
-DEEPL_API_KEY = "c0f59d26-3794-492d-91db-38d4b47d3749:fx"   # put your real key here
+
+# Put your real DeepL key here, or load from env:
+# DEEPL_API_KEY = "YOUR_REAL_DEEPL_API_KEY"
+DEEPL_API_KEY = "c0f59d26-3794-492d-91db-38d4b47d3749:fx"  # recommended
+
 DEEPL_API_PLAN = "free"                     # or "pro"
+
+# API token used by WordPress plugin (X-API-Key)
+API_TOKEN = "Ali1234"
 
 # -------------------------------------------------------------------
 # Config
@@ -73,7 +80,7 @@ class Job(db.Model):
     deadline = db.Column(db.String(50))     # keep as string for simplicity
     word_count = db.Column(db.Integer)
     price_estimate = db.Column(db.Float)
-    status = db.Column(db.String(50))       # Uploaded → Translating → Review → Done
+    status = db.Column(db.String(50))       # Uploaded → Translating → Review → Done / Error
     intent = db.Column(db.Text)             # prefilled from chatbot
     glossary_raw = db.Column(db.Text)       # raw glossary text from form
     original_filename = db.Column(db.String(255))
@@ -151,12 +158,12 @@ def apply_glossary(text: str, glossary_raw: str) -> str:
 def deepl_translate(text: str, source_lang: str, target_lang: str) -> str:
     """
     Call DeepL API.
-    Credentials are now taken from constants at the top of app.py.
+    Credentials are now taken from constants / env at the top of app.py.
     """
     api_key = DEEPL_API_KEY
     plan = DEEPL_API_PLAN
 
-    if not api_key or api_key == "YOUR_DEEPL_API_KEY_HERE":
+    if not api_key:
         # In development, just fake it so app is still usable
         return f"[NO DEEPL_API_KEY SET]\n\nOriginal:\n{text}"
 
@@ -211,8 +218,27 @@ def read_file_content(file_storage):
     return file_storage.read().decode("utf-8", errors="ignore")
 
 
+def require_admin():
+    token = request.args.get("password") or request.headers.get("X-Admin-Password")
+    if token != app.config["ADMIN_PASSWORD"]:
+        return False
+    return True
+
+
+def require_api_token():
+    """
+    Simple API key check for external integrations (WordPress plugin, etc.).
+    Expects the key either in:
+      - Header: X-API-Key
+      - Query param: ?api_key=Ali1234
+    """
+    token = request.headers.get("X-API-Key") or request.args.get("api_key")
+    if token != API_TOKEN:
+        abort(401, description="Invalid or missing API key")
+
+
 # -------------------------------------------------------------------
-# Routes
+# Routes – Web UI
 # -------------------------------------------------------------------
 @app.route("/", methods=["GET", "POST"])
 def upload_translate():
@@ -377,13 +403,6 @@ def download_job(job_uuid):
 # -------------------------------------------------------------------
 # Admin dashboard
 # -------------------------------------------------------------------
-def require_admin():
-    token = request.args.get("password") or request.headers.get("X-Admin-Password")
-    if token != app.config["ADMIN_PASSWORD"]:
-        return False
-    return True
-
-
 @app.route("/admin")
 def admin_dashboard():
     if not require_admin():
@@ -404,10 +423,14 @@ def admin_delete(job_uuid):
 
 
 # -------------------------------------------------------------------
-# Simple API for future integrations
+# API – for WordPress plugin & integrations
 # -------------------------------------------------------------------
+
+# 1) Simple text -> translation API (still useful)
 @app.route("/api/translate", methods=["POST"])
 def api_translate():
+    require_api_token()
+
     data = request.get_json() or {}
     text = data.get("text", "")
     source = data.get("source_lang") or ""
@@ -416,8 +439,133 @@ def api_translate():
     return jsonify({"translated_text": translated})
 
 
+# 2) Create a full Job (for queueing / logging) – main endpoint for WP
+@app.route("/api/jobs", methods=["POST"])
+def api_create_job():
+    """
+    JSON body example:
+
+    {
+      "client_email": "user@example.com",
+      "source_lang": "EN",
+      "target_lang": "DE",
+      "domain": "legal",
+      "tone": "formal",
+      "deadline": "2025-11-30",
+      "intent": "Translate contract EN -> DE",
+      "glossary": "Rechnung => invoice\nVertrag => contract",
+      "text": "Some text to translate"
+    }
+    """
+    require_api_token()
+
+    data = request.get_json() or {}
+
+    text = (data.get("text") or "").strip()
+    if not text:
+        return jsonify({"error": "text is required"}), 400
+
+    client_email = data.get("client_email")
+    source_lang = data.get("source_lang") or ""
+    target_lang = data.get("target_lang") or "DE"
+    domain = data.get("domain") or "general"
+    tone = data.get("tone") or "neutral"
+    deadline = data.get("deadline") or ""
+    intent = data.get("intent") or ""
+    glossary_raw = data.get("glossary") or ""
+
+    job = create_and_run_job(
+        client_email=client_email,
+        source_lang=source_lang,
+        target_lang=target_lang,
+        domain=domain,
+        tone=tone,
+        deadline=deadline,
+        intent=intent,
+        glossary_raw=glossary_raw,
+        original_text=text,
+        original_filename=None,
+        file_storage=None,
+    )
+
+    return jsonify(
+        {
+            "job_uuid": job.job_uuid,
+            "status": job.status,
+            "word_count": job.word_count,
+            "price_estimate": job.price_estimate,
+            "created_at": job.created_at.isoformat(),
+        }
+    )
+
+
+# 3) Get job metadata + texts
+@app.route("/api/jobs/<job_uuid>", methods=["GET"])
+def api_get_job(job_uuid):
+    """
+    Returns job info:
+
+    {
+      "job_uuid": "...",
+      "status": "Done",
+      "source_lang": "EN",
+      "target_lang": "DE",
+      "domain": "legal",
+      "tone": "formal",
+      "word_count": 120,
+      "price_estimate": 8.5,
+      "original_text": "...",
+      "translated_text": "...",
+      "error_message": null
+    }
+    """
+    require_api_token()
+
+    job = Job.query.filter_by(job_uuid=job_uuid).first_or_404()
+
+    return jsonify(
+        {
+            "job_uuid": job.job_uuid,
+            "status": job.status,
+            "client_email": job.client_email,
+            "source_lang": job.source_lang,
+            "target_lang": job.target_lang,
+            "domain": job.domain,
+            "tone": job.tone,
+            "deadline": job.deadline,
+            "word_count": job.word_count,
+            "price_estimate": job.price_estimate,
+            "original_filename": job.original_filename,
+            "original_text": job.original_text,
+            "translated_text": job.translated_text,
+            "error_message": job.error_message,
+            "created_at": job.created_at.isoformat(),
+            "updated_at": job.updated_at.isoformat() if job.updated_at else None,
+        }
+    )
+
+
+# 4) Get only translated text (simpler for WP)
+@app.route("/api/jobs/<job_uuid>/result", methods=["GET"])
+def api_get_job_result(job_uuid):
+    require_api_token()
+
+    job = Job.query.filter_by(job_uuid=job_uuid).first_or_404()
+    return jsonify(
+        {
+            "job_uuid": job.job_uuid,
+            "status": job.status,
+            "translated_text": job.translated_text,
+            "error_message": job.error_message,
+        }
+    )
+
+
+# 5) Legacy-style status endpoint (kept, but protected)
 @app.route("/api/status/<job_uuid>")
 def api_status(job_uuid):
+    require_api_token()
+
     job = Job.query.filter_by(job_uuid=job_uuid).first_or_404()
     return jsonify(
         {
@@ -429,8 +577,11 @@ def api_status(job_uuid):
     )
 
 
+# 6) Legacy-style download endpoint (JSON instead of file)
 @app.route("/api/download/<job_uuid>")
 def api_download(job_uuid):
+    require_api_token()
+
     job = Job.query.filter_by(job_uuid=job_uuid).first_or_404()
     return jsonify(
         {

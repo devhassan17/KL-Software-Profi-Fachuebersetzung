@@ -1,4 +1,22 @@
-/* ---- Base layout ---- */
+/* -------------------------------------------------------------
+   Base layout · Fonts & colors inspired by profi-fachuebersetzung.de
+------------------------------------------------------------- */
+
+:root {
+  /* Color system (inspired corporate palette) */
+  --pf-navy: #0b1726;
+  --pf-navy-soft: #122338;
+  --pf-navy-muted: #1f2a3c;
+  --pf-gold: #f2b544;
+  --pf-gold-dark: #d0931d;
+  --pf-bg: #f4f5f8;
+  --pf-bg-soft: #ffffff;
+  --pf-border: #e0e4ec;
+  --pf-text: #1f2933;
+  --pf-text-muted: #6b7280;
+  --pf-danger: #b91c1c;
+  --pf-success: #15803d;
+}
 
 *,
 *::before,
@@ -6,81 +24,198 @@
   box-sizing: border-box;
 }
 
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #f3f4f6;
+html, body {
   margin: 0;
   padding: 0;
-  color: #111827;
 }
 
-a {
-  color: #111827;
-  text-decoration: none;
+body {
+  font-family: "Open Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: radial-gradient(circle at top left, #e3ecff 0, #f4f5f8 45%, #f8fafc 100%);
+  color: var(--pf-text);
 }
 
-a:hover {
-  text-decoration: underline;
-}
-
-/* ---- Header ---- */
+/* -------------------------------------------------------------
+   Header
+------------------------------------------------------------- */
 
 .app-header {
-  background: #111827;
+  background: radial-gradient(circle at top left, #1c3c68 0, #0b1726 55%, #020617 100%);
   color: #f9fafb;
   padding: 1rem 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.4);
+  position: sticky;
+  top: 0;
+  z-index: 30;
 }
 
-.app-nav a {
-  color: #9ca3af;
-  margin-left: 1rem;
+.app-header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.app-logo {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-logo-main {
+  font-family: "Montserrat", system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   font-size: 0.9rem;
 }
 
+.app-logo-sub {
+  font-size: 0.78rem;
+  color: #d1d5db;
+}
+
+.app-nav {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+}
+
+.app-nav a {
+  color: #e5e7eb;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: "Montserrat", system-ui, sans-serif;
+  font-weight: 500;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid transparent;
+}
+
 .app-nav a:hover {
+  border-bottom-color: var(--pf-gold);
+  color: #ffffff;
+}
+
+/* -------------------------------------------------------------
+   Hero strip
+------------------------------------------------------------- */
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-strip {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  background: linear-gradient(to right, rgba(11, 23, 38, 0.97), rgba(11, 23, 38, 0.9)),
+              url("https://profi-fachuebersetzung.de/wp-content/uploads/2024/08/ki-uebersetzung-dolmetscher-hero.jpg")
+              center/cover no-repeat;
   color: #f9fafb;
 }
 
-/* ---- Main container ---- */
+.hero-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.25rem 1.5rem 2rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.hero-copy h1 {
+  font-family: "Montserrat", system-ui, sans-serif;
+  font-size: 1.7rem;
+  margin: 0 0 0.5rem;
+}
+
+.hero-copy p {
+  margin: 0;
+  max-width: 580px;
+  font-size: 0.9rem;
+  color: #e5e7eb;
+}
+
+.hero-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(249, 250, 251, 0.2);
+}
+
+.hero-pill-soft {
+  background: rgba(242, 181, 68, 0.08);
+  color: #fef9c3;
+  border-color: rgba(250, 204, 21, 0.5);
+}
+
+/* -------------------------------------------------------------
+   Content shell & card
+------------------------------------------------------------- */
+
+.content-shell {
+  flex: 1;
+  padding: 2.25rem 1.5rem 2.5rem;
+}
 
 .container {
   max-width: 1000px;
-  margin: 2rem auto;
-  padding: 1.5rem;
-  background: #ffffff;
-  border-radius: 1rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  margin: 0 auto;
+  padding: 1.75rem 1.5rem 1.75rem;
+  background: var(--pf-bg-soft);
+  border-radius: 1.25rem;
+  box-shadow:
+    0 18px 40px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(15, 23, 42, 0.02);
 }
 
-/* ---- Typography & cards ---- */
+/* -------------------------------------------------------------
+   Typography & card title
+------------------------------------------------------------- */
 
 .card-title {
-  font-size: 1.4rem;
+  font-family: "Montserrat", system-ui, sans-serif;
+  font-size: 1.3rem;
   font-weight: 600;
-  margin-bottom: 0.75rem;
-}
-
-p {
-  margin-top: 0;
+  margin-bottom: 0.3rem;
+  color: var(--pf-navy);
 }
 
 .section-description {
   font-size: 0.9rem;
-  color: #6b7280;
-  margin-bottom: 1rem;
+  color: var(--pf-text-muted);
+  margin-top: 0;
+  margin-bottom: 1.1rem;
 }
 
-/* ---- Form elements ---- */
+/* -------------------------------------------------------------
+   Form elements
+------------------------------------------------------------- */
 
 label {
   display: block;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 600;
   margin-bottom: 0.25rem;
-  color: #374151;
+  color: var(--pf-navy-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 input[type="text"],
@@ -89,12 +224,16 @@ input[type="date"],
 select,
 textarea {
   width: 100%;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid #d1d5db;
-  font-size: 0.9rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--pf-border);
+  font-size: 0.88rem;
   background: #f9fafb;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease,
+    transform 0.05s ease;
 }
 
 input[type="text"]:focus,
@@ -103,17 +242,18 @@ input[type="date"]:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: #111827;
-  box-shadow: 0 0 0 1px rgba(17, 24, 39, 0.1);
-  background: #ffffff;
+  border-color: var(--pf-gold);
+  box-shadow: 0 0 0 1px rgba(242, 181, 68, 0.4);
+  background-color: #ffffff;
+  transform: translateY(-1px);
 }
 
 textarea {
-  min-height: 120px;
+  min-height: 130px;
   resize: vertical;
 }
 
-/* ---- Layout helpers ---- */
+/* layout helpers */
 
 .row {
   display: flex;
@@ -126,41 +266,58 @@ textarea {
   min-width: 0;
 }
 
-/* ---- Buttons ---- */
+/* -------------------------------------------------------------
+   Buttons (primary, secondary, danger)
+------------------------------------------------------------- */
 
 .btn {
-  display: inline-block;
-  padding: 0.6rem 1.2rem;
-  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.4rem;
+  border-radius: 999px;
   border: none;
-  background: #111827;
-  color: #f9fafb;
-  font-size: 0.9rem;
+  font-family: "Montserrat", system-ui, sans-serif;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   cursor: pointer;
-  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.05s ease,
+    border-color 0.15s ease;
 }
 
-.btn:hover {
-  background: #020617;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.3);
+.btn-primary {
+  background: linear-gradient(to right, var(--pf-gold), #facc6b);
+  color: #1f2937;
+  border: 1px solid rgba(250, 204, 21, 0.7);
+  box-shadow: 0 12px 25px rgba(180, 83, 9, 0.35);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(to right, var(--pf-gold-dark), var(--pf-gold));
+  box-shadow: 0 16px 30px rgba(180, 83, 9, 0.45);
   transform: translateY(-1px);
 }
 
-.btn:active {
-  transform: translateY(0);
-  box-shadow: none;
-}
-
 .btn-secondary {
-  background: #4b5563;
+  background: transparent;
+  color: var(--pf-navy);
+  border: 1px solid rgba(148, 163, 184, 0.9);
 }
 
 .btn-secondary:hover {
-  background: #374151;
+  background: rgba(15, 23, 42, 0.04);
+  border-color: var(--pf-navy);
 }
 
 .btn-danger {
   background: #b91c1c;
+  color: #f9fafb;
+  border: 1px solid #7f1d1d;
 }
 
 .btn-danger:hover {
@@ -171,19 +328,23 @@ textarea {
   opacity: 0.6;
   cursor: default;
   box-shadow: none;
+  transform: none;
 }
 
-/* ---- Badges / status ---- */
+/* -------------------------------------------------------------
+   Badges / status chips
+------------------------------------------------------------- */
 
 .badge {
-  display: inline-block;
-  padding: 0.2rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.6rem;
   border-radius: 999px;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   background: #e5e7eb;
   color: #374151;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 .badge.status-Done {
@@ -206,81 +367,168 @@ textarea {
   color: #92400e;
 }
 
-/* ---- Preformatted text ---- */
+/* -------------------------------------------------------------
+   Preformatted text blocks
+------------------------------------------------------------- */
 
 pre {
   background: #f9fafb;
-  border-radius: 0.5rem;
-  padding: 0.75rem;
+  border-radius: 0.75rem;
+  padding: 0.8rem;
   overflow-x: auto;
   font-size: 0.8rem;
   border: 1px solid #e5e7eb;
+  line-height: 1.5;
 }
 
-/* ---- Flash messages ---- */
+/* -------------------------------------------------------------
+   Flash messages
+------------------------------------------------------------- */
 
-.flash-error {
-  color: #b91c1c;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+.flash-error,
+.flash-danger {
+  color: var(--pf-danger);
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.6rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
 }
 
 .flash-success {
-  color: #15803d;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+  color: var(--pf-success);
+  background: #ecfdf3;
+  border: 1px solid #bbf7d0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.6rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
 }
 
-/* ---- Tables (admin) ---- */
+/* -------------------------------------------------------------
+   Tables (Admin)
+------------------------------------------------------------- */
 
 table {
   border-collapse: collapse;
   width: 100%;
+  margin-top: 0.75rem;
 }
 
 th,
 td {
   padding: 0.5rem 0.25rem;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
 thead tr {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--pf-border);
 }
 
 tbody tr {
   border-bottom: 1px solid #f3f4f6;
 }
 
-/* ---- Small helpers ---- */
+/* -------------------------------------------------------------
+   Misc helpers
+------------------------------------------------------------- */
 
 .text-muted {
-  color: #6b7280;
+  color: var(--pf-text-muted);
   font-size: 0.8rem;
 }
 
 .file-list {
   margin-top: 0.25rem;
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--pf-text-muted);
 }
 
-/* ---- Responsive ---- */
+.translate-form .form-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
 
-@media (max-width: 640px) {
-  .container {
-    margin: 1rem;
-    padding: 1rem;
-  }
+.form-note {
+  font-size: 0.78rem;
+  color: var(--pf-text-muted);
+}
 
-  .app-header {
+/* -------------------------------------------------------------
+   Footer
+------------------------------------------------------------- */
+
+.app-footer {
+  border-top: 1px solid rgba(148, 163, 184, 0.35);
+  background: #0b1726;
+  color: #e5e7eb;
+  padding: 0.9rem 1.5rem;
+}
+
+.app-footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+}
+
+.footer-brand {
+  font-family: "Montserrat", system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.footer-subline {
+  color: #9ca3af;
+  font-size: 0.72rem;
+}
+
+.footer-links {
+  display: flex;
+  gap: 0.75rem;
+  color: #9ca3af;
+}
+
+/* -------------------------------------------------------------
+   Responsive
+------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .app-header-inner {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
   }
 
-  .app-nav a {
-    margin-left: 0;
-    margin-right: 0.75rem;
+  .hero-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-meta {
+    align-items: flex-start;
+  }
+
+  .content-shell {
+    padding: 1.5rem 1rem 2rem;
+  }
+
+  .container {
+    padding: 1.4rem 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-nav {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 }

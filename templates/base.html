@@ -1,30 +1,77 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="utf-8" />
-  <title>{{ title or "Upload & Translate" }}</title>
+  <title>{{ title or "Profi Fachübersetzung – KI-gestützte Übersetzungen" }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Fonts inspired by corporate translation style -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  >
+
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 <header class="app-header">
-  <div class="app-logo"><strong>TranslateFlow</strong></div>
-  <nav class="app-nav">
-    <a href="{{ url_for('upload_translate') }}">Upload &amp; Translate</a>
-    <a href="{{ url_for('admin_dashboard') }}?password={{ config['ADMIN_PASSWORD'] }}">Admin</a>
-  </nav>
+  <div class="app-header-inner">
+    <div class="app-logo">
+      <span class="app-logo-main">Profi Fachübersetzung</span>
+      <span class="app-logo-sub">KI-gestützte Übersetzungsplattform</span>
+    </div>
+    <nav class="app-nav">
+      <a href="{{ url_for('upload_translate') }}">Übersetzungstool</a>
+      <a href="{{ url_for('admin_dashboard') }}?password={{ config['ADMIN_PASSWORD'] }}">Admin</a>
+    </nav>
+  </div>
 </header>
 
-<div class="container">
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="flash-{{ category }}">{{ message }}</div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-  {% block content %}{% endblock %}
-</div>
+<main class="page">
+  <section class="hero-strip">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <h1>Globale Verbindung dank Übersetzung</h1>
+        <p>
+          Meisterhafte Fachübersetzungen – präzise und zuverlässig, ob durch
+          Künstliche Intelligenz oder professionelle Übersetzer.
+        </p>
+      </div>
+      <div class="hero-meta">
+        <span class="hero-pill">DIN EN ISO · KI &amp; Post-Editing</span>
+        <span class="hero-pill hero-pill-soft">DE ↔ EN Fachübersetzungen</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-shell">
+    <div class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </div>
+  </section>
+</main>
+
+<footer class="app-footer">
+  <div class="app-footer-inner">
+    <div>
+      <div class="footer-brand">Profi Fachübersetzung · Übersetzungsbüro</div>
+      <div class="footer-subline">Juristische · Technische · Medizinische Fachübersetzungen</div>
+    </div>
+    <div class="footer-links">
+      <span>© {{ 2025 }}</span>
+      <span>Hamburg · Deutschland</span>
+    </div>
+  </div>
+</footer>
 
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>

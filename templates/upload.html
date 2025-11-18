@@ -1,16 +1,19 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="card-title">Upload &amp; Translate</div>
+<div class="card-title">
+  Upload &amp; Fachübersetzung
+</div>
 <p class="section-description">
-  Upload TXT/DOCX/PDF files <em>or</em> paste text. Configure domain, tone,
-  deadline and glossary.
+  Laden Sie Ihre TXT, DOCX oder PDF Dateien hoch – oder fügen Sie Text direkt ein.
+  Wählen Sie Fachgebiet, Tonalität und optional ein Glossar. Die KI-Übersetzung wird
+  mit Terminologiekonsistenz verarbeitet.
 </p>
 
-<form method="post" enctype="multipart/form-data">
+<form method="post" enctype="multipart/form-data" class="translate-form">
   <div class="row">
     <div class="col">
-      <label>Client email (for notifications)</label>
-      <input type="email" name="client_email" placeholder="client@example.com" />
+      <label>Ihre E-Mail (für Rückmeldung)</label>
+      <input type="email" name="client_email" placeholder="kundin@example.com" />
     </div>
     <div class="col">
       <label>Deadline</label>
@@ -20,51 +23,52 @@
 
   <div class="row" style="margin-top:1rem;">
     <div class="col">
-      <label>Source language</label>
+      <label>Ausgangssprache</label>
       <select name="source_lang">
-        <option value="">Auto-detect</option>
-        <option value="DE">German (DE)</option>
-        <option value="EN">English (EN)</option>
+        <option value="">Auto-Erkennung</option>
+        <option value="DE">Deutsch (DE)</option>
+        <option value="EN">Englisch (EN)</option>
       </select>
     </div>
     <div class="col">
-      <label>Target language</label>
+      <label>Zielsprache</label>
       <select name="target_lang" required>
-        <option value="EN">English (EN)</option>
-        <option value="DE">German (DE)</option>
+        <option value="EN">Englisch (EN)</option>
+        <option value="DE">Deutsch (DE)</option>
       </select>
     </div>
     <div class="col">
-      <label>Domain</label>
+      <label>Fachgebiet</label>
       <select name="domain">
-        <option value="general">General</option>
-        <option value="legal">Legal</option>
-        <option value="medical">Medical</option>
-        <option value="technical">Technical</option>
+        <option value="general">Allgemein</option>
+        <option value="legal">Recht / Verträge</option>
+        <option value="medical">Medizin</option>
+        <option value="technical">Technik / IT</option>
       </select>
     </div>
     <div class="col">
-      <label>Tone</label>
+      <label>Tonalität</label>
       <select name="tone">
         <option value="neutral">Neutral</option>
-        <option value="formal">Formal</option>
-        <option value="friendly">Friendly</option>
+        <option value="formal">Formell</option>
+        <option value="friendly">Freundlich</option>
       </select>
     </div>
   </div>
 
   <div style="margin-top:1rem;">
-    <label>Chatbot intent (prefilled)</label>
-    <input type="text" name="intent" value="{{ intent or '' }}" placeholder="e.g. Translate my product manual to EN" />
+    <label>Chatbot-Intent (optional, Vorbelegung)</label>
+    <input type="text" name="intent" value="{{ intent or '' }}"
+           placeholder="z. B. Bedienungsanleitung DE → EN übersetzen" />
   </div>
 
   <div style="margin-top:1rem;">
-    <label>Paste text (Text box mode)</label>
-    <textarea name="pasted_text" placeholder="Paste text to translate..."></textarea>
+    <label>Text einfügen (Textfeld-Modus)</label>
+    <textarea name="pasted_text" placeholder="Fügen Sie hier Ihren Text ein, der übersetzt werden soll …"></textarea>
   </div>
 
   <div style="margin-top:1rem;">
-    <label>Upload files (TXT, DOCX, PDF)</label>
+    <label>Dateien hochladen (TXT, DOCX, PDF)</label>
     <input
       type="file"
       name="files"
@@ -74,12 +78,15 @@
   </div>
 
   <div style="margin-top:1rem;">
-    <label>Glossary / Terminology (one per line, format: source => target)</label>
-    <textarea name="glossary" placeholder="invoice => Rechnung&#10;contract => Vertrag"></textarea>
+    <label>Glossar / Terminologie (eine Zeile pro Begriff, Format: Quelle =&gt; Ziel)</label>
+    <textarea name="glossary" placeholder="invoice =&gt; Rechnung&#10;contract =&gt; Vertrag"></textarea>
   </div>
 
-  <div style="margin-top:1.25rem;">
-    <button type="submit" class="btn">Start translation</button>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Unverbindliche Anfrage starten</button>
+    <span class="form-note">
+      KI-Übersetzung mit optionalem Post-Editing – Preis &amp; Wortanzahl werden automatisch berechnet.
+    </span>
   </div>
 </form>
 {% endblock %}
